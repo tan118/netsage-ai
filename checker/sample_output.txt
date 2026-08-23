@@ -1,0 +1,21 @@
+
+===== NETSAGE AI RULE CHECKER =====
+
+DUPLICATE_IPS:
+  [!] Duplicate IP 192.168.10.10: PC-B and PC-A
+
+SUBNET_MASKS:
+  [OK] No problems detected.
+
+GATEWAYS:
+  [!] Gateway mismatch on PC-A: 192.168.20.1 is outside 192.168.10.0/24
+
+INTERFACES:
+  [!] Interface Fa0/2 is administratively down
+
+VLANS:
+  [!] Missing VLAN: 30
+
+ROUTES:
+  [!] Missing route: 192.168.40.0/24
+
