@@ -1,28 +1,54 @@
 # NetSage AI
 
-AI-assisted network troubleshooting helper with human review.
+## AI-Assisted Cisco Network Troubleshooting Assistant
 
-## Project
+NetSage AI is an AI-assisted network troubleshooting system that combines
+deterministic configuration checks, structured network evidence, AI-based
+diagnosis, human review, and an interactive dashboard.
 
-NetSage AI is an AI-assisted troubleshooting system for Cisco-style lab networks.
+The system is designed to help identify common Cisco networking problems
+while keeping a human engineer responsible for the final decision.
 
-It analyzes network symptoms, topology information, and show-command outputs to suggest:
+---
 
-- Likely root cause
-- OSI layer
-- Confidence level
-- Evidence
-- Next diagnostic command
-- Recommended fix
+# Features
 
-Every AI diagnosis is reviewed by a human before the fix is accepted.
+- Structured network troubleshooting case dataset
+- Cisco Packet Tracer troubleshooting cases
+- Python deterministic rule checker
+- Gemini-powered AI diagnosis
+- Structured JSON AI output
+- Confidence estimation
+- Evidence-based diagnosis
+- Recommended diagnostic commands
+- Suggested remediation steps
+- Human review workflow
+- Responsible AI logging
+- Streamlit dashboard
+- Git-based project versioning
 
-## Project Components
+---
 
-- Troubleshooting case dataset
-- Structured AI prompt library
-- Deterministic Python rule checker
-- AI diagnosis results
-- Human review and Responsible AI log
-- Troubleshooting dashboard
-- Packet Tracer demonstration
+# System Architecture
+
+```text
+                    NetSage AI
+                        |
+          +-------------+-------------+
+          |             |             |
+          v             v             v
+       Dataset     Rule Checker    Gemini AI
+          |             |             |
+          |             |             v
+          |             |       AI Diagnosis
+          |             |             |
+          +-------------+-------------+
+                        |
+                        v
+                  Human Review
+                        |
+                        v
+                 Final Diagnosis
+                        |
+                        v
+                    Dashboard
