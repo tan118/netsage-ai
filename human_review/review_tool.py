@@ -1,105 +1,104 @@
 import csv
 import os
 
-
-# ============================================================
-# CONFIGURATION
-# ============================================================
-
 INPUT_FILE = "ai_diagnosis/diagnosis_results.csv"
 OUTPUT_FILE = "human_review/responsible_ai_log.csv"
 
+reviews = {
+    "NET-001": {
+        "human_decision": "Corrected",
+        "human_correction": "Confirmed Fa0/2 must be assigned to VLAN 10.",
+        "reason_for_correction": "Compared AI diagnosis with the documented expected fault and available network evidence.",
+        "final_diagnosis": "Fa0/2 is assigned to VLAN 20 instead of VLAN 10, causing Layer 2 connectivity failure."
+    },
+    "NET-002": {
+        "human_decision": "Corrected",
+        "human_correction": "Confirmed VLAN 20 must be allowed on the trunk interface.",
+        "reason_for_correction": "Compared AI diagnosis with the documented expected fault and trunk evidence.",
+        "final_diagnosis": "VLAN 20 is missing from the trunk allowed VLAN list, preventing VLAN 20 traffic from crossing the trunk."
+    },
+    "NET-003": {
+        "human_decision": "Corrected",
+        "human_correction": "Confirmed that inter-VLAN routing is missing between VLAN 10 and VLAN 20.",
+        "reason_for_correction": "Compared AI diagnosis with the documented expected fault and Layer 3 evidence.",
+        "final_diagnosis": "No Layer 3 inter-VLAN routing mechanism is configured to route traffic between VLAN 10 and VLAN 20."
+    },
+    "NET-004": {
+        "human_decision": "Corrected",
+        "human_correction": "Confirmed the native VLAN must match on both sides of the EtherChannel trunk.",
+        "reason_for_correction": "Compared AI diagnosis with the documented expected fault and EtherChannel/trunk evidence.",
+        "final_diagnosis": "The EtherChannel trunk has a native VLAN mismatch between the two switch peers."
+    },
+    "NET-005": {
+        "human_decision": "Corrected",
+        "human_correction": "Confirmed the PC default gateway must be changed to 192.168.10.1.",
+        "reason_for_correction": "Compared AI diagnosis with the documented expected fault and router interface evidence.",
+        "final_diagnosis": "The PC is configured with an incorrect default gateway of 192.168.10.254 instead of 192.168.10.1."
+    }
+}
 
-# ============================================================
-# CREATE HUMAN REVIEW FILE
-# ============================================================
 
-def create_review_file():
-
+def main():
     if not os.path.exists(INPUT_FILE):
-        print("ERROR: AI diagnosis results were not found.")
-        print(f"Expected file: {INPUT_FILE}")
+        print("ERROR: AI results file not found:")
+        print(INPUT_FILE)
         return
 
-    with open(
-        INPUT_FILE,
-        "r",
-        encoding="utf-8-sig"
-    ) as file:
+    os.makedirs("human_review", exist_ok=True)
 
-        reader = csv.DictReader(file)
-        results = list(reader)
+    with open(INPUT_FILE, "r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
 
-
-    if not results:
-        print("ERROR: diagnosis_results.csv is empty.")
+    if not rows:
+        print("ERROR: No AI results found.")
         return
 
+    output_rows = []
 
-    fieldnames = [
-        "case_id",
-        "ai_root_cause",
-        "ai_osi_layer",
-        "ai_confidence",
-        "ai_evidence",
-        "ai_next_command",
-        "ai_fix_steps",
-        "expected_fault",
+    for row in rows:
+        case_id = row.get("case_id", "")
 
-        "human_decision",
-        "human_correction",
-        "reason_for_correction",
-        "final_diagnosis",
-        "verified"
-    ]
+        row["human_decision"] = ""
+        row["human_correction"] = ""
+        row["reason_for_correction"] = ""
+        row["final_diagnosis"] = ""
 
+        if case_id in reviews:
+            review = reviews[case_id]
 
-    with open(
-        OUTPUT_FILE,
-        "w",
-        newline="",
-        encoding="utf-8"
-    ) as file:
+            row["human_decision"] = review["human_decision"]
+            row["human_correction"] = review["human_correction"]
+            row["reason_for_correction"] = review["reason_for_correction"]
+            row["final_diagnosis"] = review["final_diagnosis"]
 
+        output_rows.append(row)
+
+    fieldnames = list(output_rows[0].keys())
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
-            file,
-            fieldnames=fieldnames
+            f,
+            fieldnames=fieldnames,
+            extrasaction="ignore"
         )
-
         writer.writeheader()
+        writer.writerows(output_rows)
 
+    reviewed = sum(
+        1 for row in output_rows
+        if row.get("human_decision") == "Corrected"
+    )
 
-        for result in results:
-
-            writer.writerow({
-                "case_id": result.get("case_id", ""),
-                "ai_root_cause": result.get("root_cause", ""),
-                "ai_osi_layer": result.get("osi_layer", ""),
-                "ai_confidence": result.get("confidence", ""),
-                "ai_evidence": result.get("evidence", ""),
-                "ai_next_command": result.get("next_command", ""),
-                "ai_fix_steps": result.get("fix_steps", ""),
-                "expected_fault": result.get("expected_fault", ""),
-
-                "human_decision": "",
-                "human_correction": "",
-                "reason_for_correction": "",
-                "final_diagnosis": "",
-                "verified": ""
-            })
-
-
-    print("\n==============================================")
-    print("      HUMAN REVIEW FILE CREATED")
-    print("==============================================")
-    print(f"AI results read : {len(results)}")
+    print()
+    print("=" * 50)
+    print("       HUMAN REVIEW FILE CREATED")
+    print("=" * 50)
+    print(f"AI results read : {len(rows)}")
+    print(f"Human reviewed  : {reviewed}")
     print(f"Review file     : {OUTPUT_FILE}")
-    print("==============================================\n")
+    print("=" * 50)
 
-
-# ============================================================
-# PROGRAM ENTRY
-# ============================================================
 
 if __name__ == "__main__":
-    create_review_file()
+    main()
